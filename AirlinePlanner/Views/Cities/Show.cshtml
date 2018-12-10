@@ -1,0 +1,13 @@
+<h3>Here are all the flights in the city "@Model["city"].GetName()":</h3>
+
+<ol>
+@foreach (var flight in @Model["flights"])
+{
+  <li><a href='/cities/@Model["city"].GetId()/flights/@flight.GetId()'>@flight.GetName(), @flight.GetDepartTime(), @flight.getStatus()</a></li>
+}
+</ol>
+
+<p><a href='/cities/@Model["city"].GetId()/delete'>Delete Category and all Items</a></p>
+<p><a href='/cities/@Model["city"].GetId()/flights/new'>Add a new flight</a></p>
+<p><a href='/cities'>Return to city list</a></p>
+<p><a href='/'>Return to Main Page</a></p>
