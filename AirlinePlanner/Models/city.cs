@@ -164,7 +164,7 @@ namespace AirlinePlanner.Models
         cmd.CommandText = @"INSERT INTO cities (name) VALUES (@name);";
         MySqlParameter name = new MySqlParameter();
         name.ParameterName = "@name";
-        name.Value = this._name;
+        name.Value = this._cityName;
         cmd.Parameters.Add(name);
         cmd.ExecuteNonQuery();
         _id = (int) cmd.LastInsertedId; // <-- This line is new!
@@ -197,10 +197,10 @@ namespace AirlinePlanner.Models
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
       cmd.CommandText = @"INSERT INTO cities_flights (departure_city_id, flight_id) VALUES (@DepartureCityId, @FlightId);";
-      MySqlParameter departure_city_id = new MySqlParameter();
-      departure_city_id.ParameterName = "@DepartureCityId";
-      departure_city_id.Value = _id;
-      cmd.Parameters.Add(departure_city_id);
+      MySqlParameter departureCityId = new MySqlParameter();
+      departureCityId.ParameterName = "@DepartureCityId";
+      departureCityId.Value = _id;
+      cmd.Parameters.Add(departureCityId);
       MySqlParameter flight_id = new MySqlParameter();
       flight_id.ParameterName = "@FlightId";
       flight_id.Value = newFlight.GetId();

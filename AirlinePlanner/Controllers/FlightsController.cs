@@ -44,16 +44,16 @@ namespace AirlinePlanner.Controllers
 
         // }
 
-         [HttpPost("/cities/{cityId}/flights/{flightId}")]
-        public ActionResult Update(int cityId, int flightId, string newName, string newDepartTime, string newStatus)
-        {
-            Flight flight = Flight.Find(flightId);
-            flight.Edit(newName, newDepartTime, newStatus);
-            Dictionary<string, object> model = new Dictionary<string, object>();
-            City city = City.Find(cityId);
-            model.Add("city", city);
-            model.Add("flight", flight);
-            return View("Show", model);
-        }
+        //  [HttpPost("/cities/{cityId}/flights/{flightId}")]
+        // public ActionResult Update(int cityId, int flightId, string newName, string newDepartTime, string newStatus)
+        // {
+        //     Flight flight = Flight.Find(flightId);
+        //     flight.Edit(newName, newDepartTime, newStatus);
+        //     Dictionary<string, object> model = new Dictionary<string, object>();
+        //     City city = City.Find(cityId);
+        //     model.Add("city", city);
+        //     model.Add("flight", flight);
+        //     return View("Show", model);
+        // }
     }
 }

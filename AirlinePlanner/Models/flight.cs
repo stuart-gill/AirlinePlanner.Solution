@@ -141,11 +141,19 @@ namespace AirlinePlanner.Models
             MySqlConnection conn = DB.Connection();
             conn.Open();
             var cmd = conn.CreateCommand() as MySqlCommand;
-            cmd.CommandText = @"INSERT INTO flights (name) VALUES (@name);";
+            cmd.CommandText = @"INSERT INTO flights (name, depart_time, status) VALUES (@name, @depart_time, @status);";
             MySqlParameter name = new MySqlParameter();
             name.ParameterName = "@name";
             name.Value = this._flightName;
             cmd.Parameters.Add(name);
+            MySqlParameter departTime = new MySqlParameter();
+            departTime.ParameterName = "@depart_time";
+            departTime.Value = this._departTime;
+            cmd.Parameters.Add(departTime);
+            MySqlParameter status = new MySqlParameter();
+            status.ParameterName = "@status";
+            status.Value = this._status;
+            cmd.Parameters.Add(status);
             cmd.ExecuteNonQuery();
             _id = (int) cmd.LastInsertedId;
             conn.Close();
@@ -156,40 +164,40 @@ namespace AirlinePlanner.Models
         }
 
 
-        public void Edit(string newName, string newDepartTime, string newStatus)
-        {
-            MySqlConnection conn = DB.Connection();
-            conn.Open();
-            var cmd = conn.CreateCommand() as MySqlCommand;
-            cmd.CommandText = @"UPDATE flights SET name, depart_time, status = @newName, @newDepartTime, @newStatus WHERE id = @searchId;";
-            MySqlParameter searchId = new MySqlParameter();
-            searchId.ParameterName = "@searchId";
-            searchId.Value = _id;
-            cmd.Parameters.Add(searchId);
-            MySqlParameter flightName = new MySqlParameter();
-            flightName.ParameterName = "@newName";
-            flightName.Value = newName;
-            cmd.Parameters.Add(flightName);
-            MySqlParameter flightDepartTime = new MySqlParameter();
-            flightDepartTime.ParameterName = "@newDepartTime";
-            flightDepartTime.Value = newDepartTime;
-            cmd.Parameters.Add(flightDepartTime);
-            MySqlParameter flightStatus = new MySqlParameter();
-            flightStatus.ParameterName = "@newStatus";
-            flightStatus.Value = newStatus;
-            cmd.Parameters.Add(flightStatus);
-            cmd.ExecuteNonQuery();
-            _status = newStatus;
-            _flightName = newName;
-            _departTime = newDepartTime;
-            conn.Close();
-            if (conn != null)
-            {
-                conn.Dispose();
-            }
-        }
+        // public void Edit(string newName, string newDepartTime, string newStatus)
+        // {
+        //     MySqlConnection conn = DB.Connection();
+        //     conn.Open();
+        //     var cmd = conn.CreateCommand() as MySqlCommand;
+        //     cmd.CommandText = @"UPDATE flights SET name, depart_time, status = @newName, @newDepartTime, @newStatus WHERE id = @searchId;";
+        //     MySqlParameter searchId = new MySqlParameter();
+        //     searchId.ParameterName = "@searchId";
+        //     searchId.Value = _id;
+        //     cmd.Parameters.Add(searchId);
+        //     MySqlParameter flightName = new MySqlParameter();
+        //     flightName.ParameterName = "@newName";
+        //     flightName.Value = newName;
+        //     cmd.Parameters.Add(flightName);
+        //     MySqlParameter flightDepartTime = new MySqlParameter();
+        //     flightDepartTime.ParameterName = "@newDepartTime";
+        //     flightDepartTime.Value = newDepartTime;
+        //     cmd.Parameters.Add(flightDepartTime);
+        //     MySqlParameter flightStatus = new MySqlParameter();
+        //     flightStatus.ParameterName = "@newStatus";
+        //     flightStatus.Value = newStatus;
+        //     cmd.Parameters.Add(flightStatus);
+        //     cmd.ExecuteNonQuery();
+        //     _status = newStatus;
+        //     _flightName = newName;
+        //     _departTime = newDepartTime;
+        //     conn.Close();
+        //     if (conn != null)
+        //     {
+        //         conn.Dispose();
+        //     }
+        // }
 
-        public void AddCity(City departureCity, City arrivalCity)
+        public void AddCitiesToJoinTable(City departureCity, City arrivalCity)
         {
             MySqlConnection conn = DB.Connection();
             conn.Open();
@@ -217,7 +225,7 @@ namespace AirlinePlanner.Models
 
 
 
-        public List<City> GetCities()
+        public List<City> GetDepartureCity()
         {
             MySqlConnection conn = DB.Connection();
             conn.Open();
@@ -246,24 +254,54 @@ namespace AirlinePlanner.Models
             }
             return cities;
         }
-     
 
-        public void Delete(int cityId, int flightId)
+        public List<City> GetArrivalCity()
         {
             MySqlConnection conn = DB.Connection();
             conn.Open();
             var cmd = conn.CreateCommand() as MySqlCommand;
-            cmd.CommandText = @"DELETE FROM flights WHERE id = @FlightId; DELETE FROM cities_flights WHERE flight_id = @FlightId;";
+            cmd.CommandText = @"SELECT cities.* FROM flights 
+                JOIN cities_flights ON (flights.id = cities_flights.flight_id)
+                JOIN cities ON (cities_flights.arrival_city_id = cities.id)
+                WHERE flights.id = @FlightId;";
             MySqlParameter flightIdParameter = new MySqlParameter();
             flightIdParameter.ParameterName = "@FlightId";
             flightIdParameter.Value = _id;
             cmd.Parameters.Add(flightIdParameter);
-            cmd.ExecuteNonQuery();
-            if (conn != null)
+            var rdr = cmd.ExecuteReader() as MySqlDataReader;
+            List<City> cities = new List<City> {};
+            while(rdr.Read())
             {
-                conn.Close();
+                int cityId = rdr.GetInt32(0);
+                string cityName = rdr.GetString(1);
+                City newCity = new City(cityName, cityId);
+                cities.Add(newCity);
             }
+            conn.Close();
+            if (conn !=null)
+            {
+                conn.Dispose();
+            }
+            return cities;
         }
+     
+
+        // public void Delete(int cityId, int flightId)
+        // {
+        //     MySqlConnection conn = DB.Connection();
+        //     conn.Open();
+        //     var cmd = conn.CreateCommand() as MySqlCommand;
+        //     cmd.CommandText = @"DELETE FROM flights WHERE id = @FlightId; DELETE FROM cities_flights WHERE flight_id = @FlightId;";
+        //     MySqlParameter flightIdParameter = new MySqlParameter();
+        //     flightIdParameter.ParameterName = "@FlightId";
+        //     flightIdParameter.Value = _id;
+        //     cmd.Parameters.Add(flightIdParameter);
+        //     cmd.ExecuteNonQuery();
+        //     if (conn != null)
+        //     {
+        //         conn.Close();
+        //     }
+        // }
 
 
   }
